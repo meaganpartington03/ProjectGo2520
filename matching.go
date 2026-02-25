@@ -176,7 +176,7 @@ func getRank(rol []int, rid int) int {
 
 
 //algo McVittie-Wilson ver sequentielle
-func offer(rid int, residents map[int]*Resident, programs map[string]*Program) { //le resident rid fait un offre au prochain rpogrammde de sa ROL
+func offerSeq(rid int, residents map[int]*Resident, programs map[string]*Program) { //le resident rid fait un offre au prochain rpogrammde de sa ROL
 	resident := residents[rid] //obtenir le resident depuis le map
 
 	if resident.nextOffer >= len(resident.rol) { //si le resident a contacter tout ses programmes il reste
@@ -185,10 +185,10 @@ func offer(rid int, residents map[int]*Resident, programs map[string]*Program) {
 
 	pid := resident.rol[resident.nextOffer] //obetnir l'ID du prochain programme a contacter
 	resident.nextOffer++ //avance l'index pour que le prochain attempt contacte le programme suivant
-	evaluate(rid, pid, residents, programs) //le programme evalue l'offre du resident
+	evaluateSeq(rid, pid, residents, programs) //le programme evalue l'offre du resident
 }
 
-func evaluate(rid int, pid string, residents map[int]*Resident, programs map[string]*Program) { //le programme pid evalue l'offre du resident rid
+func evaluateSeq(rid int, pid string, residents map[int]*Resident, programs map[string]*Program) { //le programme pid evalue l'offre du resident rid
 	program := programs[pid] //obtenir le programme du map
 
 	if len(program.selectedResidents) < program.nPositions { //soit le programme a encore des places libres
@@ -218,10 +218,10 @@ func evaluate(rid int, pid string, residents map[int]*Resident, programs map[str
 			
 			residents[rid].matchedProgram = pid //mettre a jour le nouveau resident accepte
 			residents[worstRid].matchedProgram = "" //le resident rejeter devient libre
-			offer(worstRid, residents, programs) //le resident rejeter doit iare une nouvelle offre 
+			offerSeq(worstRid, residents, programs) //le resident rejeter doit iare une nouvelle offre 
 
 		} else { 
-			offer(rid, residents, programs) //le programme prefere ses residents actuels 
+			offerSeq(rid, residents, programs) //le programme prefere ses residents actuels 
 		}
 	}
 }
@@ -296,7 +296,7 @@ func main() {
 	start := time.Now() //debut du chronometre
 
 	for id := range residents { //appeler offer pour cahque resident pour lancer l'algo
-		offer(id, residents, programs)
+		offerSeq(id, residents, programs)
 	}
 
 	end := time.Now() //fin du chronometre
