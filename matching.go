@@ -1,6 +1,7 @@
-//Partie 2 -
+//Partie 2 - 
 //Meagan Partington - 300416906
 //Anastasia Sardovskyy
+
 
 package main
 
@@ -16,20 +17,20 @@ import (
 
 // The Resident data type
 type Resident struct {
-	residentID     int
-	firstname      string
-	lastname       string
-	rol            []string // resident rank order list
-	matchedProgram string   // will be "" for unmatched resident
-	nextOffer      int      //index du prochain programme a contacter dans ROL
+	residentID int
+	firstname string
+	lastname string
+	rol []string 			// resident rank order list
+	matchedProgram string	// will be "" for unmatched resident
+	nextOffer int  //index du prochain programme a contacter dans ROL
 }
 
 // The Program data type
 type Program struct {
-	programID         string
-	name              string
-	nPositions        int   // number of positions available (quota)
-	rol               []int // program rank order list
+	programID string
+	name       string
+	nPositions  int 		// number of positions available (quota)
+	rol []int  				// program rank order list
 	selectedResidents []int //TO ADD : liste des IDs des residents selectionner
 }
 
@@ -59,8 +60,8 @@ func parseIntRol(s string) []int {
 	parts := strings.Split(s, ",")
 	var ints []int
 	for _, part := range parts {
-		pid, _ := strconv.Atoi(strings.TrimSpace(part))
-		ints = append(ints, pid)
+		pid,_:= strconv.Atoi(strings.TrimSpace(part))
+		ints= append(ints,pid) 
 	}
 	return ints
 }
@@ -105,10 +106,10 @@ func ReadResidentsCSV(filename string) (map[int]*Resident, error) {
 		}
 
 		residents[id] = &Resident{
-			residentID:     id,
-			firstname:      record[1],
-			lastname:       record[2],
-			rol:            parseRol(record[3]),
+			residentID:        id,
+			firstname: record[1],
+			lastname:  record[2],
+			rol:     parseRol(record[3]),
 			matchedProgram: "",
 		}
 	}
@@ -152,18 +153,18 @@ func ReadProgramsCSV(filename string) (map[string]*Program, error) {
 		}
 
 		programs[record[0]] = &Program{
-			programID:  record[0],
-			name:       record[1],
-			nPositions: np,
-			rol:        parseIntRol(record[3]),
+			programID: record[0],
+			name: record[1],
+			nPositions:  np,
+			rol:     parseIntRol(record[3]),
 		}
-
+		
 	}
 
 	return programs, nil
 }
 
-// getRank return la position d'un resident dans la ROL d'un programme
+//getRank return la position d'un resident dans la ROL d'un programme
 func getRank(rol []int, rid int) int {
 	for i, id := range rol {
 		if id == rid { //si on trouve le resident dans la liste, return son rang
@@ -173,8 +174,9 @@ func getRank(rol []int, rid int) int {
 	return len(rol) //le resident n'est pas dans la liste (aka rang tres bas donc non preferer)
 }
 
-// algo McVittie-Wilson ver sequentielle
-func offer(rid int, residents map[int]*Resident, programs map[string]*Program) { //le resident rid fait un offre au prochain rpogrammde de sa ROL
+
+//algo McVittie-Wilson ver sequentielle
+func offerSeq(rid int, residents map[int]*Resident, programs map[string]*Program) { //le resident rid fait un offre au prochain rpogrammde de sa ROL
 	resident := residents[rid] //obtenir le resident depuis le map
 
 	if resident.nextOffer >= len(resident.rol) { //si le resident a contacter tout ses programmes il reste
@@ -182,44 +184,44 @@ func offer(rid int, residents map[int]*Resident, programs map[string]*Program) {
 	}
 
 	pid := resident.rol[resident.nextOffer] //obetnir l'ID du prochain programme a contacter
-	resident.nextOffer++                    //avance l'index pour que le prochain attempt contacte le programme suivant
-	evaluate(rid, pid, residents, programs) //le programme evalue l'offre du resident
+	resident.nextOffer++ //avance l'index pour que le prochain attempt contacte le programme suivant
+	evaluateSeq(rid, pid, residents, programs) //le programme evalue l'offre du resident
 }
 
-func evaluate(rid int, pid string, residents map[int]*Resident, programs map[string]*Program) { //le programme pid evalue l'offre du resident rid
+func evaluateSeq(rid int, pid string, residents map[int]*Resident, programs map[string]*Program) { //le programme pid evalue l'offre du resident rid
 	program := programs[pid] //obtenir le programme du map
 
 	if len(program.selectedResidents) < program.nPositions { //soit le programme a encore des places libres
 		program.selectedResidents = append(program.selectedResidents, rid) //accepter le resident donc l'ajouter a la liste des selectionnes
-		residents[rid].matchedProgram = pid                                //marque le resident comme matched au programm
+		residents[rid].matchedProgram = pid //marque le resident comme matched au programm
 
 	} else { //ou soit le programme est plein, ont trouve le resident le moins preferer
 		worstRank := -1 //rang du pire resident actuellement selectionne
-		worstRid := -1  //ID du pire resident selectionne
+		worstRid := -1 //ID du pire resident selectionne
 
 		for _, currentRid := range program.selectedResidents {
 			rank := getRank(program.rol, currentRid) //calculet le rang de chaque resident selectionne dans le ROL du programme
-			if rank > worstRank {                    //store le resident avec le rang le plus mauvais
+			if rank > worstRank { //store le resident avec le rang le plus mauvais
 				worstRank = rank
 				worstRid = currentRid
 			}
 		}
 
 		newRank := getRank(program.rol, rid) //calculer le rang du nouveau resdient dnas le ROL du programme
-		if newRank < worstRank {             //si le programme preefere le nouveau resident
+		if newRank < worstRank { //si le programme preefere le nouveau resident 
 			for i, id := range program.selectedResidents { //remplacer le pire resident par le nouveau dans la liste des selectionnes
 				if id == worstRid {
 					program.selectedResidents[i] = rid
 					break
 				}
 			}
-
-			residents[rid].matchedProgram = pid     //mettre a jour le nouveau resident accepte
+			
+			residents[rid].matchedProgram = pid //mettre a jour le nouveau resident accepte
 			residents[worstRid].matchedProgram = "" //le resident rejeter devient libre
-			offer(worstRid, residents, programs)    //le resident rejeter doit iare une nouvelle offre
+			offerSeq(worstRid, residents, programs) //le resident rejeter doit iare une nouvelle offre 
 
-		} else {
-			offer(rid, residents, programs) //le programme prefere ses residents actuels
+		} else { 
+			offerSeq(rid, residents, programs) //le programme prefere ses residents actuels 
 		}
 	}
 }
@@ -278,14 +280,14 @@ func printResults(residents map[int]*Resident, programs map[string]*Program) {
 // Example usage
 func main() {
 
-	// read residents
-	residents, err := ReadResidentsCSV("residentSmall.csv")
+    // read residents
+	residents, err := ReadResidentsCSV("residents.csv")
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
-	programs, err := ReadProgramsCSV("programSmall.csv") //read program
+	programs, err := ReadProgramsCSV("programs.csv") //read program
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
@@ -294,7 +296,7 @@ func main() {
 	start := time.Now() //debut du chronometre
 
 	for id := range residents { //appeler offer pour cahque resident pour lancer l'algo
-		offer(id, residents, programs)
+		offerSeq(id, residents, programs)
 	}
 
 	end := time.Now() //fin du chronometre
