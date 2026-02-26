@@ -189,6 +189,11 @@ func offerSeq(rid int, residents map[int]*Resident, programs map[string]*Program
 func evaluateSeq(rid int, pid string, residents map[int]*Resident, programs map[string]*Program) { //le programme pid evalue l'offre du resident rid
 	program := programs[pid] //obtenir le programme du map
 
+	if program == nil { //si le programme n'existe pas dans le map, ignore cette offre
+		offerSeq(rid, residents, programs) //essayer le prochain programme
+		return
+	}
+
 	if len(program.selectedResidents) < program.nPositions { //soit le programme a encore des places libres
 		program.selectedResidents = append(program.selectedResidents, rid) //accepter le resident donc l'ajouter a la liste des selectionnes
 		residents[rid].matchedProgram = pid                                //marque le resident comme matched au programm
@@ -280,16 +285,16 @@ func main() {
 
 	// read residents
 	//residents, err := ReadResidentsCSV("residentSmall.csv")
-	residents, err := ReadResidentsCSV("residentsLarge.csv")
-	//residents, err := ReadResidentsCSV("residents4000.csv")
+	//residents, err := ReadResidentsCSV("residentsLarge.csv")
+	residents, err := ReadResidentsCSV("residents4000.csv")
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
 	//programs, err := ReadProgramsCSV("programSmall.csv") //read program
-	programs, err := ReadProgramsCSV("programsLarge.csv")
-	//programs, err := ReadProgramsCSV("programs4000.csv")
+	//programs, err := ReadProgramsCSV("programsLarge.csv")
+	programs, err := ReadProgramsCSV("programs4000.csv")
 	if err != nil {
 		fmt.Println("Error:", err)
 		return

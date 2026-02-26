@@ -198,6 +198,15 @@ func offerCon(wg *sync.WaitGroup, mu *sync.Mutex, rid int, residents map[int]*Re
 func evaluateCon(wg *sync.WaitGroup, mu *sync.Mutex, rid int, pid string, residents map[int]*Resident, programs map[string]*Program) {
 	program := programs[pid] //obtenir le programme du map
 
+	if program == nil { //si le programme n'existe pas dans le map, ignorer cette offre
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			offerCon(wg, mu, rid, residents, programs)
+		}()
+		return
+	}
+
 	wg.Add(1)
 
 	go func() {
@@ -208,6 +217,7 @@ func evaluateCon(wg *sync.WaitGroup, mu *sync.Mutex, rid int, pid string, reside
 		if len(program.selectedResidents) < program.nPositions {
 			program.selectedResidents = append(program.selectedResidents, rid)
 			residents[rid].matchedProgram = pid
+			mu.Unlock() 
 
 		} else {
 			worstRank := -1
@@ -232,13 +242,14 @@ func evaluateCon(wg *sync.WaitGroup, mu *sync.Mutex, rid int, pid string, reside
 
 				residents[rid].matchedProgram = pid
 				residents[worstRid].matchedProgram = ""
+				mu.Unlock() //unlock avant d'appelet offerCon
 				offerCon(wg, mu, worstRid, residents, programs)
 
 			} else {
+				mu.Unlock() //unlock avant appeler offerCon
 				offerCon(wg, mu, rid, residents, programs)
 			}
 		}
-		mu.Unlock()
 	}()
 }
 
@@ -299,8 +310,8 @@ func main() {
 	var mu sync.Mutex
 
 	// read residents
-	residents, err := ReadResidentsCSV("residentSmall.csv")
-	//residents, err := ReadResidentsCSV("residentsLarge.csv")
+	//residents, err := ReadResidentsCSV("residentSmall.csv")
+	residents, err := ReadResidentsCSV("residentsLarge.csv")
 	//residents, err := ReadResidentsCSV("residents4000.csv")
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -308,8 +319,8 @@ func main() {
 	}
 
 	//read program
-	programs, err := ReadProgramsCSV("programSmall.csv")
-	//programs, err := ReadProgramsCSV("programsLarge.csv")
+	//programs, err := ReadProgramsCSV("programSmall.csv")
+	programs, err := ReadProgramsCSV("programsLarge.csv")
 	//programs, err := ReadProgramsCSV("programs4000.csv")
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -322,6 +333,7 @@ func main() {
 		offerCon(&wg, &mu, id, residents, programs)
 	}
 
+	wg.Wait() //attendre que toutes les goroutines sont terminers
 	end := time.Now()
 
 	printResults(residents, programs) //afficher dans le format
