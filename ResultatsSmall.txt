@@ -1,0 +1,42 @@
+Version Concurrente
+Fichiers: programSmall.csv et programSmall.csv
+
+
+lastname,firstname,residentID,programID,name
+Clown,Marie,773,OBG,Obstetrics and Gynecology   
+Frederick,Rosalie,517,NRS,Neurosurgery
+Jarvis,Zev,226,MMI,Microbiology
+Medrano,Indie,126,NRS,Neurosurgery
+Olson,Aspyn,403,HEP,Hematological Pathology     
+Paquet,Camille,913,HEP,Hematological Pathology  
+Robert,Laurent,616,OBG,Obstetrics and Gynecology
+Tan,Tom,377,XXX,NOT_MATCHED
+Tremmo,Emma,828,OBG,Obstetrics and Gynecology   
+Williams,Salvatore,574,NRS,Neurosurgery
+Number of unmatched residents: 1
+Number of positions available: 1
+
+Execution time: 0s
+
+
+
+
+Version sequentielle
+
+lastname,firstname,residentID,programID,name
+Clown,Marie,773,OBG,Obstetrics and Gynecology
+Frederick,Rosalie,517,NRS,Neurosurgery
+Jarvis,Zev,226,MMI,Microbiology
+Medrano,Indie,126,NRS,Neurosurgery
+Olson,Aspyn,403,HEP,Hematological Pathology
+Paquet,Camille,913,HEP,Hematological Pathology
+Robert,Laurent,616,OBG,Obstetrics and Gynecology
+Tan,Tom,377,XXX,NOT_MATCHED
+Tremmo,Emma,828,OBG,Obstetrics and Gynecology
+Williams,Salvatore,574,NRS,Neurosurgery
+Number of unmatched residents: 1
+Number of positions available: 1
+
+Execution time: 0s
+
+Process finished with the exit code 0

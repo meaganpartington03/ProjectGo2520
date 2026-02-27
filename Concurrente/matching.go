@@ -217,7 +217,7 @@ func evaluateCon(wg *sync.WaitGroup, mu *sync.Mutex, rid int, pid string, reside
 		if len(program.selectedResidents) < program.nPositions {
 			program.selectedResidents = append(program.selectedResidents, rid)
 			residents[rid].matchedProgram = pid
-			mu.Unlock() 
+			mu.Unlock()
 
 		} else {
 			worstRank := -1
